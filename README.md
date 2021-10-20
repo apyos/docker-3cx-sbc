@@ -27,6 +27,10 @@ All the `systemd` stuff was ripped out, as it does not align with idiomatic Dock
 
 No, it doesn't. When trying to update from the Management Console, nothing will happen except a small warning in the logs. Images are static, and the entire container should be replaced by a new version in order to update.
 
+### Does re-provisioning work?
+
+Yes, the configuration is automatically kept in sync with the Management Console, and the `Push Config` also works.
+
 ### When will new releases be available?
 
 Assuming new versions remain compatible with this repository's way of installing the SBC, new versions should be published to the registry (https://github.com/apyos/docker-3cx-sbc/pkgs/container/docker-3cx-sbc) in the hour following a new release. This is done automatically using GitHub Actions, and can be seen here: https://github.com/apyos/docker-3cx-sbc/actions.
