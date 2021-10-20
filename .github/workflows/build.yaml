@@ -36,7 +36,7 @@ jobs:
       - name: Check if new version
         id: check-new-version
         run: |
-          IS_NEW=$(docker image inspect ${{ env.IMAGE_NAME }}:${{ steps.fetch-latest-version.outputs.version }} >/dev/null 2>&1 && echo false || echo true)
+          IS_NEW=$(docker image inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.fetch-latest-version.outputs.version }} >/dev/null 2>&1 && echo false || echo true)
           echo "::set-output name=isNew::$IS_NEW"
 
   build:
