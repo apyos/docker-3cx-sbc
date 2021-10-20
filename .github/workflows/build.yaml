@@ -6,6 +6,11 @@ on:
       - "main"
   schedule:
     - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "3CX SBC version to build"
+        required: true
 
 env:
   REGISTRY: ghcr.io
@@ -41,7 +46,7 @@ jobs:
 
   build:
     needs: check
-    if: github.event_name	== 'push' || needs.check.outputs.isNew == 'true'
+    if: github.event_name	!= 'schedule' || needs.check.outputs.isNew == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -60,12 +65,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Select version
+        id: select-version
+        run: |
+          if [ ${{ github.event_name }} == 'workflow_dispatch' ]
+          then
+              echo "::set-output name=version::${{ github.event.inputs.version }}"
+          else
+              echo "::set-output name=version::${{ needs.check.outputs.version }}"
+          fi
+
       - name: Get image tags
         id: get-tags
         env:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
-          IFS='.' read -r -a array <<< ${{ needs.check.outputs.version }}
+          IFS='.' read -r -a array <<< ${{ steps.select-version.outputs.version }}
           TAGS=$(cat << EOF
           ${{ env.IMAGE }}:latest
           ${{ env.IMAGE }}:${array[0]}
@@ -86,4 +101,4 @@ jobs:
           push: true
           tags: ${{ steps.get-tags.outputs.tags }}
           build-args: |
-            SBC_VERSION=${{ needs.check.outputs.version }}
+            SBC_VERSION=${{ steps.select-version.outputs.version }}
