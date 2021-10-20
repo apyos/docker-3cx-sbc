@@ -48,8 +48,6 @@ jobs:
     needs: check
     if: github.event_name	!= 'schedule' || needs.check.outputs.isNew == 'true'
     runs-on: ubuntu-latest
-    env:
-      DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -79,6 +77,8 @@ jobs:
 
       - name: Get image tags
         id: get-tags
+        env:
+          DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
           IFS='.' read -r -a array <<< ${{ steps.select-version.outputs.version }}
           TAGS=$(cat << EOF
@@ -95,6 +95,8 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v2
+        env:
+          DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         with:
           context: .
           platforms: linux/amd64,linux/armhf
