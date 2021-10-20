@@ -48,6 +48,8 @@ jobs:
     needs: check
     if: github.event_name	!= 'schedule' || needs.check.outputs.isNew == 'true'
     runs-on: ubuntu-latest
+    env:
+      DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -77,15 +79,13 @@ jobs:
 
       - name: Get image tags
         id: get-tags
-        env:
-          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
           IFS='.' read -r -a array <<< ${{ steps.select-version.outputs.version }}
           TAGS=$(cat << EOF
-          ${{ env.IMAGE }}:latest
-          ${{ env.IMAGE }}:${array[0]}
-          ${{ env.IMAGE }}:${array[0]}.${array[1]}
-          ${{ env.IMAGE }}:${array[0]}.${array[1]}.${array[2]}
+          ${{ env.DOCKER_IMAGE }}:latest
+          ${{ env.DOCKER_IMAGE }}:${array[0]}
+          ${{ env.DOCKER_IMAGE }}:${array[0]}.${array[1]}
+          ${{ env.DOCKER_IMAGE }}:${array[0]}.${array[1]}.${array[2]}
           EOF
           )
           TAGS="${TAGS//'%'/'%25'}"
@@ -102,3 +102,5 @@ jobs:
           tags: ${{ steps.get-tags.outputs.tags }}
           build-args: |
             SBC_VERSION=${{ steps.select-version.outputs.version }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
