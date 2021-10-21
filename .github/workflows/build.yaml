@@ -28,9 +28,9 @@ jobs:
         id: fetch-latest-version
         run: |
           echo "::group::Add 3CX repository"
-          curl "https://downloads-global.3cx.com/downloads/3cxpbx/public.key" | apt-key add -
-          echo "deb https://downloads-global.3cx.com/downloads/debian ${{ env.DEBIAN_VERSION }} main" > /etc/apt/sources.list.d/3cxpbx.list
-          apt update
+          curl "https://downloads-global.3cx.com/downloads/3cxpbx/public.key" | sudo apt-key add -
+          echo "deb https://downloads-global.3cx.com/downloads/debian ${{ env.DEBIAN_VERSION }} main" | sudo tee /etc/apt/sources.list.d/3cxpbx.list > /dev/null
+          sudo apt update
           echo "::endgroup::"
 
           echo "::group::Get latest versiopn"
@@ -76,9 +76,9 @@ jobs:
         run: |
           if [ ${{ github.event_name }} == 'workflow_dispatch' ]
           then
-              echo "::set-output name=version::${{ github.event.inputs.version }}"
+            echo "::set-output name=version::${{ github.event.inputs.version }}"
           else
-              echo "::set-output name=version::${{ needs.check.outputs.version }}"
+            echo "::set-output name=version::${{ needs.check.outputs.version }}"
           fi
 
       - name: Get image tags
