@@ -26,13 +26,10 @@ jobs:
     steps:
       - name: Fetch latest version
         id: fetch-latest-version
-        uses: docker://debian:${{ env.DEBIAN_VERSION }}
         run: |
-          echo "::group::Install dependencies"
-          apt update
-          apt install -y wget gnupg
-          wget -t 1 -T 10 -qO - "https://downloads-global.3cx.com/downloads/3cxpbx/public.key" | apt-key add -
-          echo "deb https://downloads-global.3cx.com/downloads/debian buster main" > /etc/apt/sources.list.d/3cxpbx.list
+          echo "::group::Add 3CX repository"
+          curl "https://downloads-global.3cx.com/downloads/3cxpbx/public.key" | apt-key add -
+          echo "deb https://downloads-global.3cx.com/downloads/debian ${{ env.DEBIAN_VERSION }} main" > /etc/apt/sources.list.d/3cxpbx.list
           apt update
           echo "::endgroup::"
 
