@@ -15,30 +15,20 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  DEBIAN_VERSION: buster
 
 jobs:
   check:
     runs-on: ubuntu-latest
-    container:
-      image: debian:buster
     outputs:
       isNew: ${{ steps.check-new-version.outputs.isNew }}
       version: ${{ steps.fetch-latest-version.outputs.version }}
     steps:
-      - name: Install dependencies
+      - name: Fetch latest version
+        id: fetch-latest-version
+        uses: docker://debian:${{ env.DEBIAN_VERSION }}
         run: |
-          echo "::group::Install docker"
-          apt update
-          apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
-          curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
-            $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-          apt update
-          apt install -y docker-ce
-          echo "::endgroup::"
-
-          echo "::group::Add 3CX repository"
+          echo "::group::Install dependencies"
           apt update
           apt install -y wget gnupg
           wget -t 1 -T 10 -qO - "https://downloads-global.3cx.com/downloads/3cxpbx/public.key" | apt-key add -
@@ -46,12 +36,11 @@ jobs:
           apt update
           echo "::endgroup::"
 
-      - name: Fetch latest version
-        id: fetch-latest-version
-        run: |
+          echo "::group::Get latest versiopn"
           VERSION=$(apt-cache show 3cxsbc | grep Version | head -n 1 | sed 's/Version: //g')
           [ -z $VERSION ] && { echo "Could not find a package version"; exit 1; }
           echo "::set-output name=version::$VERSION"
+          echo "::endgroup::"
 
       - name: Check if new version
         id: check-new-version
@@ -124,5 +113,6 @@ jobs:
           tags: ${{ steps.get-tags.outputs.tags }}
           build-args: |
             SBC_VERSION=${{ steps.select-version.outputs.version }}
+            DEBIAN_VERSION=${{ env.DEBIAN_VERSION }}
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
