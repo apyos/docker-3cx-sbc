@@ -28,6 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           echo "::group::Install docker"
+          apt update
           apt install apt-transport-https ca-certificates curl gnupg lsb-release
           curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
           echo \
