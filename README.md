@@ -35,8 +35,10 @@ Here is an example `docker-compose.yaml` file that illustrates all of this:
 version: "2.4"
 
 services:
-  app:
+  sbc:
     image: ghcr.io/apyos/docker-3cx-sbc
+    network_mode: host
+    restart: unless-stopped
     environment:
       - PBX_URL=https://my.3cx.be
       - PBX_KEY=MySBCKey
@@ -47,6 +49,7 @@ services:
 
   watchtower:
     image: containrrr/watchtower
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --http-api-update
