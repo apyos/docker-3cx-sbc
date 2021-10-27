@@ -25,7 +25,40 @@ All the `systemd` stuff was ripped out, as it does not align with idiomatic Dock
 
 ### Does this image support automatic updates?
 
-No, it doesn't. When trying to update from the Management Console, nothing will happen except a small warning in the logs. Images are static, and the entire container should be replaced by a new version in order to update.
+You don't want to be running automatic updates for `3cxsbc`, as it could cut ongoing phone calls. You can however configure this image to be able to manually update the container through the Management Console.
+
+Technically, the running container does not upgrade the `3cxsbc` version it's running by itself. It is however possible to trigger an update through [`watchtower`](https://containrrr.dev/watchtower/). To do so, you'll need to be running a dedicated instance of `watchtower`, and to pass the `WATCHTOWER_API` and `WATCHTOWER_TOKEN` environment variables to the `3cxsbc` container.
+
+Here is an example `docker-compose.yaml` file that illustrates all of this:
+
+```yaml
+version: "2.4"
+
+services:
+  app:
+    image: ghcr.io/apyos/docker-3cx-sbc
+    environment:
+      - PBX_URL=https://my.3cx.be
+      - PBX_KEY=MySBCKey
+      - WATCHTOWER_API=watchtower:8080
+      - WATCHTOWER_TOKEN=token
+    labels:
+      - "com.centurylinklabs.watchtower.scope=3cxsbc"
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --http-api-update
+    environment:
+      - WATCHTOWER_HTTP_API_TOKEN=token
+    labels:
+      - "com.centurylinklabs.watchtower.scope=3cxsbc"
+```
+
+The `com.centurylinklabs.watchtower.scope` label needs to be specified and have the same value on both containers, as updates wouldn't work otherwise. If you're running multiple instances of this image on the same Docker host, you need to make sure that this value is also unique for each `watchtower`/`3cxsbc` pair. If not, an update through the Management Console would simply update all containers running on the host at the same time, which might not be desirable.
+
+The `WATCHTOWER_TOKEN` and `WATCHTOWER_HTTP_API_TOKEN` environment variables also need to match.
 
 ### Does re-provisioning work?
 
