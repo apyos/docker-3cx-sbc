@@ -42,7 +42,7 @@ services:
     environment:
       - PBX_URL=https://my.3cx.be
       - PBX_KEY=MySBCKey
-      - WATCHTOWER_API=watchtower:8080
+      - WATCHTOWER_API=127.0.0.1:8123
       - WATCHTOWER_TOKEN=token
     labels:
       - "com.centurylinklabs.watchtower.scope=3cxsbc"
@@ -53,6 +53,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --http-api-update
+    ports:
+      - 127.0.0.1:8123:8080
     environment:
       - WATCHTOWER_HTTP_API_TOKEN=token
     labels:
