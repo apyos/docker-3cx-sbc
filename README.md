@@ -45,3 +45,14 @@ Images are published with the `latest` tag as well as the 3 SemVer versions. For
 - `docker pull ghcr.io/apyos/docker-3cx-sbc`
 
 As suggested by SemVer, `docker pull ghcr.io/apyos/docker-3cx-sbc:2` will always point to the latest `2.*.*` version.
+
+### Can I extend the configuration using `3cxsbc.conf.local`?
+
+Yes, you can simply create a file and mount it as a read-only volume on `/etc/3cxsbc.conf.local`:
+
+```bash
+docker run \
+    ...
+    -v /path/to/3cxsbc.conf.local:/etc/3cxsbc.conf.local:ro
+    ghcr.io/apyos/docker-3cx-sbc
+```
