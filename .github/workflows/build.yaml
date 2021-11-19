@@ -27,17 +27,9 @@ jobs:
       - name: Fetch latest version
         id: fetch-latest-version
         run: |
-          echo "::group::Add 3CX repository"
-          curl "https://downloads-global.3cx.com/downloads/3cxpbx/public.key" | sudo apt-key add -
-          echo "deb https://downloads-global.3cx.com/downloads/debian ${{ env.DEBIAN_VERSION }} main" | sudo tee /etc/apt/sources.list.d/3cxpbx.list > /dev/null
-          sudo apt update
-          echo "::endgroup::"
-
-          echo "::group::Get latest versiopn"
-          VERSION=$(apt-cache show 3cxsbc | grep Version | head -n 1 | sed 's/Version: //g')
+          VERSION=$(curl -s https://downloads-global.3cx.com/downloads/debian/dists/buster/main/binary-amd64/Packages | grep -A 3 "Package: 3cxsbc" | grep Version | sed 's/Version: //g' | sort -Vr | head -n 1)
           [ -z $VERSION ] && { echo "Could not find a package version"; exit 1; }
           echo "::set-output name=version::$VERSION"
-          echo "::endgroup::"
 
       - name: Check if new version
         id: check-new-version
