@@ -13,7 +13,7 @@ on:
         required: true
 
 env:
-  REGISTRY: ghcr.io
+  GHCR_REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   DEBIAN_VERSION: buster
 
@@ -34,7 +34,7 @@ jobs:
       - name: Check if new version
         id: check-new-version
         run: |
-          IS_NEW=$(docker manifest inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.fetch-latest-version.outputs.version }} >/dev/null 2>&1 && echo false || echo true)
+          IS_NEW=$(docker manifest inspect ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.fetch-latest-version.outputs.version }} >/dev/null 2>&1 && echo false || echo true)
           echo "::set-output name=isNew::$IS_NEW"
 
       - name: Print information
@@ -44,7 +44,7 @@ jobs:
 
   build:
     needs: check
-    if: github.event_name	!= 'schedule' || needs.check.outputs.isNew == 'true'
+    if: github.event_name != 'schedule' || needs.check.outputs.isNew == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -56,10 +56,16 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Login to Docker
+      - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -76,14 +82,18 @@ jobs:
       - name: Get image tags
         id: get-tags
         env:
-          DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          GHCR_IMAGE: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
           IFS='.' read -r -a array <<< ${{ steps.select-version.outputs.version }}
           TAGS=$(cat << EOF
-          ${{ env.DOCKER_IMAGE }}:latest
-          ${{ env.DOCKER_IMAGE }}:${array[0]}
-          ${{ env.DOCKER_IMAGE }}:${array[0]}.${array[1]}
-          ${{ env.DOCKER_IMAGE }}:${array[0]}.${array[1]}.${array[2]}
+          ${{ env.IMAGE_NAME }}:latest
+          ${{ env.IMAGE_NAME }}:${array[0]}
+          ${{ env.IMAGE_NAME }}:${array[0]}.${array[1]}
+          ${{ env.IMAGE_NAME }}:${array[0]}.${array[1]}.${array[2]}
+          ${{ env.GHCR_IMAGE }}:latest
+          ${{ env.GHCR_IMAGE }}:${array[0]}
+          ${{ env.GHCR_IMAGE }}:${array[0]}.${array[1]}
+          ${{ env.GHCR_IMAGE }}:${array[0]}.${array[1]}.${array[2]}
           EOF
           )
           TAGS="${TAGS//'%'/'%25'}"
@@ -94,7 +104,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         env:
-          DOCKER_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          DOCKER_IMAGE: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
         with:
           context: .
           platforms: linux/amd64,linux/armhf
