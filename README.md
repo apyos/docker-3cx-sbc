@@ -10,7 +10,7 @@ docker run \
     --net host \
     -e PBX_URL=https://my.3cx.be \ # Provisioning URL
     -e PBX_KEY=MySBCKey \          # Authentication KEY ID
-    ghcr.io/apyos/docker-3cx-sbc
+    apyos/docker-3cx-sbc
 ```
 
 Both `PBX_URL` and `PBX_KEY` come from the https://apyos.3cx.be/#/app/siptrunks page, after an SBC was added.
@@ -36,7 +36,7 @@ version: "2.4"
 
 services:
   sbc:
-    image: ghcr.io/apyos/docker-3cx-sbc
+    image: apyos/docker-3cx-sbc
     network_mode: host
     restart: unless-stopped
     environment:
@@ -77,12 +77,12 @@ Assuming new versions remain compatible with this repository's way of installing
 
 Images are published with the `latest` tag as well as the 3 SemVer versions. For example, assuming version is the `2.3.4` is the most recent one, it can be pulled with any of the following:
 
-- `docker pull ghcr.io/apyos/docker-3cx-sbc:2.3.4`
-- `docker pull ghcr.io/apyos/docker-3cx-sbc:2.3`
-- `docker pull ghcr.io/apyos/docker-3cx-sbc:2`
-- `docker pull ghcr.io/apyos/docker-3cx-sbc`
+- `docker pull apyos/docker-3cx-sbc:2.3.4`
+- `docker pull apyos/docker-3cx-sbc:2.3`
+- `docker pull apyos/docker-3cx-sbc:2`
+- `docker pull apyos/docker-3cx-sbc`
 
-As suggested by SemVer, `docker pull ghcr.io/apyos/docker-3cx-sbc:2` will always point to the latest `2.*.*` version.
+As suggested by SemVer, `docker pull apyos/docker-3cx-sbc:2` will always point to the latest `2.*.*` version.
 
 ### Can I extend the configuration using `3cxsbc.conf.local`?
 
@@ -92,5 +92,5 @@ Yes, you can simply create a file and mount it as a read-only volume on `/etc/3c
 docker run \
     ...
     -v /path/to/3cxsbc.conf.local:/etc/3cxsbc.conf.local:ro
-    ghcr.io/apyos/docker-3cx-sbc
+    apyos/docker-3cx-sbc
 ```
