@@ -17,7 +17,7 @@ RUN apt update \
 FROM debian:${DEBIAN_VERSION}-slim
 
 RUN apt update \
-    && apt install -y curl libssl1.1
+    && apt install -y curl libssl1.1 ca-certificates
 
 COPY --from=build /tmp/usr/sbin/3cxsbc /usr/sbin/3cxsbc
 
