@@ -1,0 +1,21 @@
+name: keepalive
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Keepalive
+        uses: gautamkrishnar/keepalive-workflow@v2
+        with:
+          workflow_files: "build.yaml"
+          time_elapsed: "0"
