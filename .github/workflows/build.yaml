@@ -15,7 +15,7 @@ on:
 env:
   GHCR_REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  DEBIAN_VERSION: buster
+  DEBIAN_VERSION: bookworm
 
 jobs:
   check:
@@ -27,7 +27,7 @@ jobs:
       - name: Fetch latest version
         id: fetch-latest-version
         run: |
-          VERSION=$(curl -s https://downloads-global.3cx.com/downloads/debian/dists/buster/main/binary-amd64/Packages | grep -A 3 "Package: 3cxsbc" | grep Version | sed 's/Version: //g' | sort -Vr | head -n 1)
+          VERSION=$(curl -s http://repo.3cx.com/3cx/dists/${{ env.DEBIAN_VERSION }}/main/binary-amd64/Packages | sed -n '/Package: 3cxsbc$/,/^$/p' | grep Version | sed 's/Version: //g' | sort -Vr | head -n 1)
           [ -z $VERSION ] && { echo "Could not find a package version"; exit 1; }
           echo "::set-output name=version::$VERSION"
 
@@ -107,7 +107,7 @@ jobs:
           DOCKER_IMAGE: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
         with:
           context: .
-          platforms: linux/amd64,linux/armhf
+          platforms: linux/amd64,linux/armhf,linux/arm64
           push: true
           tags: ${{ steps.get-tags.outputs.tags }}
           build-args: |
