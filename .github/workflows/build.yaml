@@ -87,7 +87,7 @@ jobs:
             ${{ env.IMAGE_NAME }}
             ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ needs.check.outputs.isNew == 'true' }}
+            type=raw,value=latest,enable=true
             type=semver,pattern={{version}},value=${{ steps.select-version.outputs.version }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.select-version.outputs.version }}
             type=semver,pattern={{major}},value=${{ steps.select-version.outputs.version }}
